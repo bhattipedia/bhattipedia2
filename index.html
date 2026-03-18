@@ -98,86 +98,103 @@
 </div>
 
 <script>
-// 1. Consolidated Splash & Auth Logic
+const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
+
+// Handle Splash and Initial View
 window.addEventListener('load', function() {
     setTimeout(function() {
-        // Hide splash screen
+        // 1. Hide Splash
         document.getElementById('splash-screen').style.display = 'none';
         
-        // ONLY show auth-screen if there is NO active session
-        if (!localStorage.getItem("session")) {
-            document.getElementById('auth-screen').style.display = 'block';
+        // 2. Check Session
+        const session = localStorage.getItem("session");
+        if (session) {
+            loadDash(); // Go straight to dashboard
         } else {
-            // If session exists, ensure auth is hidden and dash is shown
-            loadDash();
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('auth-screen').style.display = 'flex'; // Use flex for centering
         }
     }, 2000);
 });
 
-const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
-
-// 2. Updated Auth Function (Removed location.reload for a smoother feel)
 async function doAuth(type) {
+    const loader = type === 'login' ? 'l-email' : 's-email';
     if(type === 'login') {
         const e = document.getElementById('l-email').value;
         const p = document.getElementById('l-pass').value;
+        if(!e || !p) return alert("Please fill all fields");
+
         const res = await fetch(`${API}?action=login&email=${e}&password=${p}`);
         const d = await res.json();
         
         if(d.success) {
             localStorage.setItem("session", JSON.stringify({e, n: d.userName}));
-            // Instead of reloading the whole page and triggering the splash again:
-            loadDash(); 
+            loadDash(); // Transition immediately
         } else {
             alert("Wrong credentials!");
         }
     } else {
-        // ... (Your existing signup code is fine)
+        const n = document.getElementById('s-name').value;
+        const e = document.getElementById('s-email').value;
+        const p = document.getElementById('s-pass').value;
+        const res = await fetch(API, { method: 'POST', body: JSON.stringify({action:'signup', name:n, email:e, password:p}) });
+        const d = await res.json();
+        if(d.success) { alert("Account Created! Login now."); showSignup(false); }
+        else alert(d.msg);
     }
 }
 
-// 3. Updated loadDash to handle visibility cleanly
 async function loadDash() {
-    const sessionData = localStorage.getItem("session");
-    if(!sessionData) return;
-
-    const user = JSON.parse(sessionData);
+    const user = JSON.parse(localStorage.getItem("session"));
     
-    // Clean up visibility
-    document.getElementById('auth-screen').style.display = 'none'; // Force hide
+    // Switch screens immediately
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('dash-screen').classList.remove('hidden');
     
     document.getElementById('u-name').innerText = user.n;
     document.getElementById('u-email').innerText = user.e;
 
+    // Fetch Course Data
     try {
         const res = await fetch(`${API}?action=getData&email=${user.e}`);
         const data = await res.json();
-        const list = document.getElementById('list');
-        
-        list.innerHTML = data.map(c => `
-            <div class="course-card">
-                <img src="${c.thumb}" class="thumb">
-                <div class="info">
-                    <span class="badge ${c.type.toLowerCase()}">${c.type}</span>
-                    <h2 style="text-align:left; margin:15px 0; font-weight:800; color:var(--dark); font-size:20px;">${c.title}</h2>
-                    ${c.locked ? `<button class="btn btn-primary" onclick="showPay()">Unlock - Rs. ${c.price}</button>` : 
-                        c.content.map(l => `
-                            <div class="video-box">
-                                <b style="font-size:14px; display:block; margin-bottom:10px;">${l.title}</b>
-                                <iframe src="${l.link}" allowfullscreen></iframe>
-                            </div>
-                        `).join('')}
-                </div>
-            </div>
-        `).join('');
+        renderCourses(data);
     } catch (err) {
-        console.error("Failed to load courses:", err);
+        console.error("Dashboard Load Error:", err);
     }
 }
 
-// Remove the standalone if(localStorage.getItem("session")) loadDash(); 
-// at the bottom, as it's now handled by the splash screen timer logic.
+function renderCourses(data) {
+    const list = document.getElementById('list');
+    list.innerHTML = data.map(c => `
+        <div class="course-card">
+            <img src="${c.thumb}" class="thumb">
+            <div class="info">
+                <span class="badge ${c.type.toLowerCase()}">${c.type}</span>
+                <h2 style="text-align:left; margin:15px 0; font-weight:800; color:var(--dark); font-size:20px;">${c.title}</h2>
+                ${c.locked ? `<button class="btn btn-primary" onclick="showPay()">Unlock - Rs. ${c.price}</button>` : 
+                    c.content.map(l => `
+                        <div class="video-box">
+                            <b style="font-size:14px; display:block; margin-bottom:10px;">${l.title}</b>
+                            <iframe src="${l.link}" allowfullscreen></iframe>
+                        </div>
+                    `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Utility functions
+function showSignup(is) {
+    document.getElementById('login-group').classList.toggle('hidden', is);
+    document.getElementById('signup-group').classList.toggle('hidden', !is);
+    document.getElementById('title').innerText = is ? "Create BhattiPedia Account" : "Login to Your Account";
+}
+function showPay() { document.getElementById('pay-modal').classList.remove('hidden'); }
+function hidePay() { document.getElementById('pay-modal').classList.add('hidden'); }
+function logout() { localStorage.clear(); location.reload(); }
+function forgot() { window.open("https://wa.me/923097247244?text=Forgot%20BhattiPedia%20Password%20For%20Email:"); }
 
 </script>
 </body>
