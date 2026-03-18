@@ -3,171 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BhattiPedia: Professional Learning</title>
+    <title>BhattiPedia Pro</title>
     <style>
         :root { --primary: #128148; --gold: #DFA206; --dark: #1F2F29; --bg: #f2f7f5; --white: #ffffff; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; color: var(--dark); padding-bottom: 80px; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
         .hidden { display: none !important; }
         
-        /* Auth Styles */
-        .container-center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .card-auth { background: var(--white); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--gold); position: relative; }
-        .admin-badge { position: absolute; top: -15px; right: 20px; background: var(--dark); color: white; padding: 5px 15px; border-radius: 15px; font-size: 11px; font-weight: 800; border: 2px solid var(--gold); }
-        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; outline: none; }
-        
-        /* Navigation (Home in middle) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 2px solid var(--gold); z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
-        .nav-item { text-align: center; color: #7f8c8d; font-size: 11px; cursor: pointer; font-weight: 700; flex: 1; text-transform: uppercase; }
-        .nav-item.active { color: var(--primary); }
-
-        /* Dashboard */
-        header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .course-card { background: white; margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .thumb { width: 100%; height: 170px; object-fit: cover; }
-        .info { padding: 18px; }
-        
-        /* Admin Panels */
-        .admin-box { background: #fff; margin: 15px; padding: 20px; border-radius: 15px; border-left: 5px solid var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; margin-top: 10px; transition: 0.2s; }
+        /* Auth */
+        .card-auth { background: white; padding: 30px; border-radius: 25px; width: 90%; max-width: 400px; margin: 50px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--gold); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; margin-top: 10px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-admin { background: var(--dark); color: white; }
-        .link-text { text-align: center; margin-top: 15px; font-size: 13px; color: #2980b9; cursor: pointer; font-weight: 600; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; z-index: 1000; }
+        .nav-item { text-align: center; color: #7f8c8d; font-size: 12px; cursor: pointer; flex: 1; font-weight: 700; }
+        .nav-item.active { color: var(--primary); }
+
+        header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .course-card { background: white; margin: 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .thumb { width: 100%; height: 160px; object-fit: cover; }
+        .info { padding: 15px; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div id="auth-screen" class="container-center">
+<div id="auth-screen">
     <div class="card-auth">
-        <div id="admin-indicator" class="admin-badge hidden">ADMIN ACCESS</div>
-        <h2 id="auth-title" style="text-align:center; color:var(--primary);">Student Login</h2>
-        
+        <h2 id="auth-title">Student Login</h2>
         <div id="login-fields">
-            <input type="email" id="l-email" placeholder="Email Address">
-            <input type="password" id="l-pass" placeholder="Password">
-            <button id="auth-btn" class="btn btn-primary" onclick="doLogin()">Login</button>
-            
-            <div id="user-options">
-                <p class="link-text" onclick="toggleSignup(true)">Create New Account</p>
-                <p class="link-text" onclick="forgot()" style="color:#7f8c8d; font-size:11px;">Forgot Password?</p>
-                <p class="link-text" onclick="setMode('admin')" style="color:var(--gold); border-top:1px solid #eee; padding-top:10px;">Login as Admin</p>
-            </div>
-            
-            <div id="admin-options" class="hidden">
-                <p class="link-text" onclick="setMode('user')" style="color:#7f8c8d;">Back to Student Login</p>
-            </div>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button id="login-btn" class="btn btn-primary" onclick="handleLogin()">Login</button>
+            <p id="signup-link" style="text-align:center; cursor:pointer; color:blue;" onclick="toggleSignup(true)">Create Account</p>
+            <p style="text-align:center; cursor:pointer; font-size:12px;" onclick="window.open('https://wa.me/923097247244')">Forgot Password?</p>
+            <hr>
+            <button id="admin-mode-btn" class="btn btn-admin" onclick="setAdminMode(true)">Login as Admin</button>
         </div>
-
         <div id="signup-fields" class="hidden">
             <input type="text" id="s-name" placeholder="Full Name">
-            <input type="email" id="s-email" placeholder="Email Address">
-            <input type="password" id="s-pass" placeholder="Create Password">
-            <p style="font-size:10px; color:#999; text-align:center;">By signing up, you agree to BhattiPedia Terms of Service.</p>
-            <button class="btn btn-primary" onclick="doSignup()">Agree & Register</button>
-            <p class="link-text" onclick="toggleSignup(false)">Already have an account? Login</p>
+            <input type="email" id="s-email" placeholder="Email">
+            <input type="password" id="s-pass" placeholder="Password">
+            <button class="btn btn-primary" onclick="handleSignup()">Register</button>
+            <p style="text-align:center; cursor:pointer;" onclick="toggleSignup(false)">Back to Login</p>
         </div>
     </div>
 </div>
 
-<div id="main-app" class="hidden">
+<div id="app-screen" class="hidden">
     <header>
-        <div><b id="u-name">User</b><br><small id="u-role" style="opacity:0.8;">Student</small></div>
-        <button onclick="logout()" style="background:transparent; border:1px solid white; color:white; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600;">Logout</button>
+        <div><b id="display-name">User</b><br><small id="display-role">Student</small></div>
+        <button onclick="location.reload()" style="color:white; background:none; border:1px solid white;">Logout</button>
     </header>
 
-    <div id="view-paid" class="view hidden"></div>
-    <div id="view-home" class="view"></div>
-    <div id="view-free" class="view hidden"></div>
+    <div id="view-paid" class="hidden"></div>
+    <div id="view-home"></div>
+    <div id="view-free" class="hidden"></div>
     
-    <div id="view-admin" class="view hidden">
-        <div class="admin-box">
-            <h4 style="margin-top:0;">Course Enrollment Approval</h4>
-            <input type="email" id="adm-mail" placeholder="User Email">
-            <input type="text" id="adm-cid" placeholder="Course ID (e.g., C01)">
-            <button class="btn btn-admin" onclick="adminCommand('enroll')">Approve Access</button>
-        </div>
-        <div class="admin-box">
-            <h4 style="margin-top:0;">New Course / Lessons</h4>
-            <input type="text" id="c-title" placeholder="Course Title">
-            <select id="c-type"><option value="Paid">Paid</option><option value="Free">Free</option></select>
-            <button class="btn btn-primary" onclick="adminCommand('addCourse')">Publish Course</button>
+    <div id="view-admin" class="hidden">
+        <div style="padding:20px;">
+            <h3>Admin: Course Approval</h3>
+            <input type="email" id="adm-user" placeholder="User Email">
+            <input type="text" id="adm-cid" placeholder="Course ID">
+            <button class="btn btn-admin" onclick="adminAction('enroll')">Approve User</button>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item" onclick="switchTab('paid')">Paid</div>
-        <div class="nav-item active" onclick="switchTab('home')">Home</div>
-        <div class="nav-item" onclick="switchTab('free')">Free</div>
-        <div id="admin-nav" class="nav-item hidden" onclick="switchTab('admin')">Admin</div>
+        <div class="nav-item" onclick="switchTab('paid')">PAID</div>
+        <div class="nav-item active" onclick="switchTab('home')">HOME</div>
+        <div class="nav-item" onclick="switchTab('free')">FREE</div>
+        <div id="admin-tab" class="nav-item hidden" onclick="switchTab('admin')">ADMIN</div>
     </nav>
 </div>
 
 <script>
-    const API = "YOUR_APPS_SCRIPT_URL";
+    const API = "YOUR_NEW_DEPLOY_URL";
     let isAdmin = false;
 
-    // Authentication Toggles
-    function setMode(mode) {
-        isAdmin = (mode === 'admin');
-        document.getElementById('auth-title').innerText = isAdmin ? "Admin Portal" : "Student Login";
-        document.getElementById('admin-indicator').classList.toggle('hidden', !isAdmin);
-        document.getElementById('user-options').classList.toggle('hidden', isAdmin);
-        document.getElementById('admin-options').classList.toggle('hidden', !isAdmin);
-        document.getElementById('auth-btn').className = isAdmin ? "btn btn-admin" : "btn btn-primary";
+    function setAdminMode(val) {
+        isAdmin = val;
+        document.getElementById('auth-title').innerText = val ? "Admin Portal" : "Student Login";
+        document.getElementById('signup-link').classList.toggle('hidden', val);
+        document.getElementById('admin-mode-btn').classList.toggle('hidden', val);
     }
 
-    function toggleSignup(show) {
-        document.getElementById('login-fields').classList.toggle('hidden', show);
-        document.getElementById('signup-fields').classList.toggle('hidden', !show);
+    function toggleSignup(val) {
+        document.getElementById('login-fields').classList.toggle('hidden', val);
+        document.getElementById('signup-fields').classList.toggle('hidden', !val);
     }
 
-    function forgot() { 
-        window.open("https://wa.me/923097247244?text=Forgot%20BhattiPedia%20Password%20For%20Email:"); 
+    async function handleLogin() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        const action = isAdmin ? 'adminLogin' : 'login';
+        
+        const res = await fetch(`${API}?action=${action}&email=${e}&password=${p}`);
+        const d = await res.json();
+        
+        if(d.success) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('display-name').innerText = d.userName;
+            if(isAdmin) document.getElementById('admin-tab').classList.remove('hidden');
+            loadData(e);
+        } else {
+            alert(d.msg);
+        }
     }
 
-    // Login Logic
-    async function doLogin() {
-        const e = document.getElementById('l-email').value;
-        const p = document.getElementById('l-pass').value;
-        const action = isAdmin ? 'adminLogin' : 'login'; // Validates against "Admins" or "Users" sheet
-
-        try {
-            const res = await fetch(`${API}?action=${action}&email=${e}&password=${p}`);
-            const d = await res.json();
-
-            if(d.success) {
-                const session = { e: e, name: d.userName, role: isAdmin ? 'admin' : 'user' };
-                localStorage.setItem("session", JSON.stringify(session));
-                launchApp(session);
-            } else { alert("Error: " + d.msg); }
-        } catch(err) { alert("Server Error. Check your Script URL."); }
+    async function loadData(email) {
+        const res = await fetch(`${API}?action=getData&email=${email}`);
+        const courses = await res.json();
+        renderHome(courses);
     }
 
-    function launchApp(user) {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('u-name').innerText = user.name;
-        document.getElementById('u-role').innerText = user.role.toUpperCase();
-
-        if(user.role === 'admin') document.getElementById('admin-nav').classList.remove('hidden');
-        loadData(user.e);
+    function renderHome(data) {
+        document.getElementById('view-home').innerHTML = data.map(c => `
+            <div class="course-card">
+                <img src="${c.thumb}" class="thumb">
+                <div class="info">
+                    <h4>${c.title}</h4>
+                    ${c.locked ? `<button class="btn btn-primary">Rs. ${c.price} - Unlock</button>` : `<button class="btn btn-primary">Start Learning</button>`}
+                </div>
+            </div>
+        `).join('');
     }
 
     function switchTab(tab) {
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById(`view-${tab}`).classList.remove('hidden');
-        event.currentTarget.classList.add('active');
-    }
-
-    function logout() { localStorage.clear(); location.reload(); }
-    
-    // Admin specific functions
-    async function adminCommand(cmd) {
-        // Logic to send updates back to Sheets
-        alert("Command sent: " + cmd);
+        ['view-home', 'view-paid', 'view-free', 'view-admin'].forEach(v => document.getElementById(v).classList.add('hidden'));
+        document.getElementById('view-' + tab).classList.remove('hidden');
     }
 </script>
-
 </body>
 </html>
