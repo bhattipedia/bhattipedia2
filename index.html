@@ -3,203 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BhattiPedia: Premium Learning Platform</title>
+    <title>BhattiPedia Pro</title>
     <style>
         :root { --primary: #128148; --gold: #DFA206; --dark: #1F2F29; --bg: #f2f7f5; --white: #ffffff; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; color: var(--dark); }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; color: var(--dark); padding-bottom: 80px; }
         .hidden { display: none !important; }
         
-        /* Auth Screens */
+        /* Auth Styles */
         .container-center { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .card-auth { background: var(--white); padding: 35px; border-radius: 25px; width: 100%; max-width: 420px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 5px solid var(--gold); }
-        h1, h2 { text-align: center; color: var(--primary); font-weight: 800; }
-        .tos-box { font-size: 11px; color: #7f8c8d; background: #fdfdfd; padding: 10px; border: 1px solid #eee; border-radius: 8px; margin: 15px 0; height: 60px; overflow-y: scroll; }
-        input { width: 100%; padding: 15px; margin: 12px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 14px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 16px; transition: 0.3s; margin-top: 15px; text-transform: uppercase; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(18,129,72,0.3); }
-        .btn-primary:hover { opacity: 0.9; }
-        .link-text { text-align: center; margin-top: 20px; font-size: 14px; cursor: pointer; color: #2980b9; font-weight: 600; }
+        .card-auth { background: var(--white); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--gold); position: relative; }
+        .admin-badge { position: absolute; top: -15px; right: 20px; background: var(--gold); color: white; padding: 5px 15px; border-radius: 15px; font-size: 12px; font-weight: 800; }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
+        
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { text-align: center; color: #7f8c8d; font-size: 12px; cursor: pointer; font-weight: 600; flex: 1; }
+        .nav-item.active { color: var(--primary); }
 
-        /* Dashboard */
-        header { background: var(--primary); color: white; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 3px 15px rgba(0,0,0,0.1); border-bottom: 3px solid var(--gold); }
-        .course-list { padding: 25px; }
-        .course-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); border: 1px solid #f1f1f1; }
-        .thumb { width: 100%; height: 190px; object-fit: cover; border-bottom: 3px solid #eee; }
-        .info { padding: 25px; }
-        .badge { padding: 6px 15px; border-radius: 25px; font-size: 11px; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
-        .free { background: #e6faf1; color: #0f6136; border: 1px solid #abe3c9; }
-        .paid { background: #fff8e6; color: #a17004; border: 1px solid #f9e1a9; }
-        
-        /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(31,47,41,0.95); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
-        .modal-inner { background: white; padding: 30px; border-radius: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .pay-details { background: #fffcf0; border: 1px dashed var(--gold); padding: 18px; border-radius: 12px; font-size: 13px; line-height: 1.7; margin: 20px 0; font-family: 'Courier New', monospace; }
-        
-        /* Video Container */
-        .video-box { margin-top: 20px; border-top: 2px solid #f1f1f1; padding-top: 20px; }
-        iframe { width: 100%; height: 230px; border-radius: 12px; border: none; background: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        /* Course Layout */
+        header { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .course-card { background: white; margin: 15px; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .thumb { width: 100%; height: 180px; object-fit: cover; }
+        .info { padding: 20px; }
+
+        /* Admin Dashboard Styles */
+        .admin-section { padding: 20px; background: #fff; margin: 15px; border-radius: 15px; border: 1px solid #eee; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; margin-top: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-admin { background: var(--dark); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #27ae60; z-index: 1000; display: flex; justify-content: center; align-items: center;">
-    <h1 style="color:white; font-size: 40px;">BhattiPedia</h1>
+<div id="splash" style="position:fixed; top:0; width:100%; height:100%; background:var(--primary); z-index:9999; display:flex; justify-content:center; align-items:center; color:white;">
+    <h1>BhattiPedia</h1>
 </div>
 
 <div id="auth-screen" class="container-center hidden">
     <div class="card-auth">
-        <h1>BhattiPedia</h1>
-        <h2 id="title" style="color:var(--dark); font-weight: 600; font-size: 18px; margin-top: -15px;">Login to Your Account</h2>
-        <div id="login-group">
-            <input type="email" id="l-email" placeholder="Email Address">
-            <input type="password" id="l-pass" placeholder="Password">
-            <button class="btn btn-primary" onclick="doAuth('login')">Login</button>
-            <p class="link-text" onclick="showSignup(true)">Create New Account</p>
-            <p class="link-text" onclick="forgot()" style="color:#7f8c8d; font-size:12px;">Forgot Password?</p>
-        </div>
-        <div id="signup-group" class="hidden">
-            <input type="text" id="s-name" placeholder="Full Name">
-            <input type="email" id="s-email" placeholder="Email Address">
-            <input type="password" id="s-pass" placeholder="Create Password">
-            <div class="tos-box">
-                <b>BhattiPedia Terms of Service:</b><br>
-                1. Account is personal and not for sharing. 2. Any attempt to pirate or download videos will result in immediate ban. 3. All payments (EasyPaisa/Bank) are for manual verification only. 4. Content is the intellectual property of Muhammad Sajid Mukhtar.
-            </div>
-            <button class="btn btn-primary" onclick="doAuth('signup')">Agreed & Sign Up</button>
-            <p class="link-text" onclick="showSignup(false)">Already have an account? Login</p>
+        <div id="admin-indicator" class="admin-badge hidden">ADMIN MODE</div>
+        <h2 id="auth-title">Student Login</h2>
+        
+        <div id="auth-form">
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="pass" placeholder="Password">
+            <button id="main-auth-btn" class="btn btn-primary" onclick="processLogin()">Login</button>
+            
+            <p id="toggle-admin" class="link" style="text-align:center; margin-top:15px; font-size:13px; cursor:pointer; color:#2980b9;" onclick="setAuthMode('admin')">Login as Admin</p>
+            <p id="toggle-user" class="link hidden" style="text-align:center; margin-top:15px; font-size:13px; cursor:pointer; color:#7f8c8d;" onclick="setAuthMode('user')">Back to Student Login</p>
         </div>
     </div>
 </div>
 
-<div id="dash-screen" class="hidden">
+<div id="main-app" class="hidden">
     <header>
-        <div><b id="u-name" style="font-size:18px;">Name</b><br><small id="u-email" style="font-size:12px; opacity: 0.8;"></small></div>
-        <button onclick="logout()" style="background:transparent; border:2px solid var(--gold); color:var(--gold); padding:6px 12px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">Logout</button>
+        <div><b id="user-name">Loading...</b><br><small id="user-role">Student</small></div>
+        <button onclick="logout()" style="background:none; border:1px solid white; color:white; border-radius:5px; padding:5px 10px;">Logout</button>
     </header>
-    <div class="course-list" id="list"></div>
-</div>
 
-<div id="pay-modal" class="modal hidden">
-    <div class="modal-inner">
-        <h3 style="color:var(--primary); font-weight:800; text-align:center;">Unlock Premium Course</h3>
-        <p style="text-align:center; font-size:14px; color:#555;">Send payment and WhatsApp the screenshot to 03097247244 for immediate approval.</p>
-        <div class="pay-details">
-            <b>EasyPaisa / JazzCash:</b> 03097247244<br>
-            <b>Allied Bank (ABL):</b> PK15ABPA0010129872550013<br>
-            <b>Bank of Punjab (BOP):</b> PK98BPUN6280351270300015<br>
-            <b>---------------------------------------</b><br>
-            <b>ACCOUNT TITLE:</b> MUHAMMAD SAJID MUKHTAR
+    <div id="view-home" class="view"></div>
+    <div id="view-paid" class="view hidden"></div>
+    <div id="view-free" class="view hidden"></div>
+    
+    <div id="view-admin" class="view hidden">
+        <div class="admin-section">
+            <h3>Course Enrollment</h3>
+            <input type="email" id="adm-target-email" placeholder="User Email">
+            <input type="text" id="adm-target-course" placeholder="Course ID (e.g. C01)">
+            <button class="btn btn-admin" onclick="adminAction('enroll')">Approve Access</button>
         </div>
-        <button class="btn btn-primary" onclick="hidePay()">Got it, Close</button>
+        <div class="admin-section">
+            <h3>Manage Courses</h3>
+            <input type="text" id="new-c-title" placeholder="Course Title">
+            <input type="text" id="new-c-id" placeholder="Course ID">
+            <select id="new-c-type"><option value="Paid">Paid</option><option value="Free">Free</option></select>
+            <button class="btn btn-primary" onclick="adminAction('addCourse')">Add Course</button>
+        </div>
     </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="showTab('paid')">Paid</div>
+        <div class="nav-item active" onclick="showTab('home')">Home</div>
+        <div class="nav-item" onclick="showTab('free')">Free</div>
+        <div id="nav-admin-btn" class="nav-item hidden" onclick="showTab('admin')">Admin</div>
+    </nav>
 </div>
 
 <script>
-    const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
+    const API = "YOUR_GOOGLE_SCRIPT_URL";
+    let is_admin_mode = false;
 
-    window.addEventListener('load', function() {
-        console.log("Page Loaded. Starting timer...");
-        setTimeout(function() {
-            document.getElementById('splash-screen').style.display = 'none';
-            console.log("Splash hidden.");
-            
-            const session = localStorage.getItem("session");
-            if (session) {
-                console.log("Session found, loading dashboard...");
-                loadDash();
+    window.onload = () => {
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            const session = JSON.parse(localStorage.getItem("bp_session"));
+            if(session) {
+                renderDashboard(session);
             } else {
-                console.log("No session, showing login.");
-                const auth = document.getElementById('auth-screen');
-                auth.classList.remove('hidden');
-                auth.style.display = 'flex'; 
+                document.getElementById('auth-screen').classList.remove('hidden');
             }
-        }, 2000);
-    });
+        }, 1500);
+    };
 
-    async function doAuth(type) {
-        if(type === 'login') {
-            const e = document.getElementById('l-email').value;
-            const p = document.getElementById('l-pass').value;
-            if(!e || !p) return alert("Fill all fields");
-
-            console.log("Attempting login for:", e);
-            try {
-                const res = await fetch(`${API}?action=login&email=${e}&password=${p}`);
-                const d = await res.json();
-                console.log("Server response:", d);
-
-                if(d.success) {
-                    localStorage.setItem("session", JSON.stringify({e: e, n: d.userName}));
-                    loadDash();
-                } else {
-                    alert("Login failed: " + (d.msg || "Check password"));
-                }
-            } catch (err) {
-                console.error("Auth Error:", err);
-                alert("Server Connection Error. Check console.");
-            }
-        } else {
-            const n = document.getElementById('s-name').value;
-            const e = document.getElementById('s-email').value;
-            const p = document.getElementById('s-pass').value;
-            const res = await fetch(API, { method: 'POST', body: JSON.stringify({action:'signup', name:n, email:e, password:p}) });
-            const d = await res.json();
-            if(d.success) { alert("Account Created! Login now."); showSignup(false); }
-            else alert(d.msg);
-        }
+    function setAuthMode(mode) {
+        is_admin_mode = (mode === 'admin');
+        document.getElementById('auth-title').innerText = is_admin_mode ? "Admin Portal" : "Student Login";
+        document.getElementById('admin-indicator').classList.toggle('hidden', !is_admin_mode);
+        document.getElementById('toggle-admin').classList.toggle('hidden', is_admin_mode);
+        document.getElementById('toggle-user').classList.toggle('hidden', !is_admin_mode);
+        document.getElementById('main-auth-btn').className = is_admin_mode ? "btn btn-admin" : "btn btn-primary";
     }
 
-    async function loadDash() {
-        const sessionData = localStorage.getItem("session");
-        if(!sessionData) return;
-        const user = JSON.parse(sessionData);
+    async function processLogin() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        const action = is_admin_mode ? 'adminLogin' : 'login';
 
-        // UI Switch
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('dash-screen').classList.remove('hidden');
-        
-        document.getElementById('u-name').innerText = user.n;
-        document.getElementById('u-email').innerText = user.e;
-
-        console.log("Fetching courses for:", user.e);
         try {
-            const res = await fetch(`${API}?action=getData&email=${user.e}`);
+            const res = await fetch(`${API}?action=${action}&email=${e}&password=${p}`);
             const data = await res.json();
-            console.log("Courses loaded:", data);
-            
-            const list = document.getElementById('list');
-            list.innerHTML = data.map(c => `
-                <div class="course-card">
-                    <img src="${c.thumb}" class="thumb">
-                    <div class="info">
-                        <span class="badge ${c.type.toLowerCase()}">${c.type}</span>
-                        <h2 style="text-align:left; margin:15px 0; font-weight:800; color:var(--dark); font-size:20px;">${c.title}</h2>
-                        ${c.locked ? `<button class="btn btn-primary" onclick="showPay()">Unlock - Rs. ${c.price}</button>` : 
-                            c.content.map(l => `
-                                <div class="video-box">
-                                    <b style="font-size:14px; display:block; margin-bottom:10px;">${l.title}</b>
-                                    <iframe src="${l.link}" allowfullscreen></iframe>
-                                </div>
-                            `).join('')}
-                    </div>
-                </div>
-            `).join('');
-        } catch (err) {
-            console.error("Data Load Error:", err);
-        }
+
+            if(data.success) {
+                const session = { e: e, name: data.name, role: is_admin_mode ? 'admin' : 'user' };
+                localStorage.setItem("bp_session", JSON.stringify(session));
+                renderDashboard(session);
+            } else {
+                alert("Authentication Failed: " + data.msg);
+            }
+        } catch(err) { alert("Server Error. Check your Script URL."); }
     }
 
-    function showSignup(is) {
-        document.getElementById('login-group').classList.toggle('hidden', is);
-        document.getElementById('signup-group').classList.toggle('hidden', !is);
-        document.getElementById('title').innerText = is ? "Create BhattiPedia Account" : "Login to Your Account";
+    function renderDashboard(user) {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('user-name').innerText = user.name;
+        document.getElementById('user-role').innerText = user.role.toUpperCase();
+
+        if(user.role === 'admin') {
+            document.getElementById('nav-admin-btn').classList.remove('hidden');
+        }
+        loadContent(user.e);
     }
-    function showPay() { document.getElementById('pay-modal').classList.remove('hidden'); }
-    function hidePay() { document.getElementById('pay-modal').classList.add('hidden'); }
+
+    async function loadContent(email) {
+        const res = await fetch(`${API}?action=getAppData&email=${email}`);
+        const courses = await res.json();
+        // Logical rendering for Home, Paid, and Free tabs goes here
+    }
+
+    function showTab(tab) {
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(`view-${tab}`).classList.remove('hidden');
+        event.currentTarget.classList.add('active');
+    }
+
     function logout() { localStorage.clear(); location.reload(); }
-    function forgot() { window.open("https://wa.me/923097247244?text=Forgot%20BhattiPedia%20Password%20For%20Email:"); }
+
+    async function adminAction(type) {
+        // Logic to send approval/course management to GAS
+        alert("Admin Request Sent: " + type);
+    }
 </script>
 </body>
 </html>
