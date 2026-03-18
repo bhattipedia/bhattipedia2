@@ -44,12 +44,10 @@
 <body>
 
 <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #27ae60; z-index: 1000; display: flex; justify-content: center; align-items: center;">
-        <img src="Assets/logo.png" style="width: 250px;">
-    </div>
+    <h1 style="color:white; font-size: 40px;">BhattiPedia</h1>
+</div>
 
-    <div id="auth-screen" style="display: none;">
-        </div>
-<div id="auth-screen" class="container-center">
+<div id="auth-screen" class="container-center hidden">
     <div class="card-auth">
         <h1>BhattiPedia</h1>
         <h2 id="title" style="color:var(--dark); font-weight: 600; font-size: 18px; margin-top: -15px;">Login to Your Account</h2>
@@ -98,104 +96,110 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
+    const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
 
-// Handle Splash and Initial View
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        // 1. Hide Splash
-        document.getElementById('splash-screen').style.display = 'none';
-        
-        // 2. Check Session
-        const session = localStorage.getItem("session");
-        if (session) {
-            loadDash(); // Go straight to dashboard
+    window.addEventListener('load', function() {
+        console.log("Page Loaded. Starting timer...");
+        setTimeout(function() {
+            document.getElementById('splash-screen').style.display = 'none';
+            console.log("Splash hidden.");
+            
+            const session = localStorage.getItem("session");
+            if (session) {
+                console.log("Session found, loading dashboard...");
+                loadDash();
+            } else {
+                console.log("No session, showing login.");
+                const auth = document.getElementById('auth-screen');
+                auth.classList.remove('hidden');
+                auth.style.display = 'flex'; 
+            }
+        }, 2000);
+    });
+
+    async function doAuth(type) {
+        if(type === 'login') {
+            const e = document.getElementById('l-email').value;
+            const p = document.getElementById('l-pass').value;
+            if(!e || !p) return alert("Fill all fields");
+
+            console.log("Attempting login for:", e);
+            try {
+                const res = await fetch(`${API}?action=login&email=${e}&password=${p}`);
+                const d = await res.json();
+                console.log("Server response:", d);
+
+                if(d.success) {
+                    localStorage.setItem("session", JSON.stringify({e: e, n: d.userName}));
+                    loadDash();
+                } else {
+                    alert("Login failed: " + (d.msg || "Check password"));
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+                alert("Server Connection Error. Check console.");
+            }
         } else {
-            document.getElementById('auth-screen').classList.remove('hidden');
-            document.getElementById('auth-screen').style.display = 'flex'; // Use flex for centering
+            const n = document.getElementById('s-name').value;
+            const e = document.getElementById('s-email').value;
+            const p = document.getElementById('s-pass').value;
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({action:'signup', name:n, email:e, password:p}) });
+            const d = await res.json();
+            if(d.success) { alert("Account Created! Login now."); showSignup(false); }
+            else alert(d.msg);
         }
-    }, 2000);
-});
+    }
 
-async function doAuth(type) {
-    const loader = type === 'login' ? 'l-email' : 's-email';
-    if(type === 'login') {
-        const e = document.getElementById('l-email').value;
-        const p = document.getElementById('l-pass').value;
-        if(!e || !p) return alert("Please fill all fields");
+    async function loadDash() {
+        const sessionData = localStorage.getItem("session");
+        if(!sessionData) return;
+        const user = JSON.parse(sessionData);
 
-        const res = await fetch(`${API}?action=login&email=${e}&password=${p}`);
-        const d = await res.json();
+        // UI Switch
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('dash-screen').classList.remove('hidden');
         
-        if(d.success) {
-            localStorage.setItem("session", JSON.stringify({e, n: d.userName}));
-            loadDash(); // Transition immediately
-        } else {
-            alert("Wrong credentials!");
+        document.getElementById('u-name').innerText = user.n;
+        document.getElementById('u-email').innerText = user.e;
+
+        console.log("Fetching courses for:", user.e);
+        try {
+            const res = await fetch(`${API}?action=getData&email=${user.e}`);
+            const data = await res.json();
+            console.log("Courses loaded:", data);
+            
+            const list = document.getElementById('list');
+            list.innerHTML = data.map(c => `
+                <div class="course-card">
+                    <img src="${c.thumb}" class="thumb">
+                    <div class="info">
+                        <span class="badge ${c.type.toLowerCase()}">${c.type}</span>
+                        <h2 style="text-align:left; margin:15px 0; font-weight:800; color:var(--dark); font-size:20px;">${c.title}</h2>
+                        ${c.locked ? `<button class="btn btn-primary" onclick="showPay()">Unlock - Rs. ${c.price}</button>` : 
+                            c.content.map(l => `
+                                <div class="video-box">
+                                    <b style="font-size:14px; display:block; margin-bottom:10px;">${l.title}</b>
+                                    <iframe src="${l.link}" allowfullscreen></iframe>
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error("Data Load Error:", err);
         }
-    } else {
-        const n = document.getElementById('s-name').value;
-        const e = document.getElementById('s-email').value;
-        const p = document.getElementById('s-pass').value;
-        const res = await fetch(API, { method: 'POST', body: JSON.stringify({action:'signup', name:n, email:e, password:p}) });
-        const d = await res.json();
-        if(d.success) { alert("Account Created! Login now."); showSignup(false); }
-        else alert(d.msg);
     }
-}
 
-async function loadDash() {
-    const user = JSON.parse(localStorage.getItem("session"));
-    
-    // Switch screens immediately
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('dash-screen').classList.remove('hidden');
-    
-    document.getElementById('u-name').innerText = user.n;
-    document.getElementById('u-email').innerText = user.e;
-
-    // Fetch Course Data
-    try {
-        const res = await fetch(`${API}?action=getData&email=${user.e}`);
-        const data = await res.json();
-        renderCourses(data);
-    } catch (err) {
-        console.error("Dashboard Load Error:", err);
+    function showSignup(is) {
+        document.getElementById('login-group').classList.toggle('hidden', is);
+        document.getElementById('signup-group').classList.toggle('hidden', !is);
+        document.getElementById('title').innerText = is ? "Create BhattiPedia Account" : "Login to Your Account";
     }
-}
-
-function renderCourses(data) {
-    const list = document.getElementById('list');
-    list.innerHTML = data.map(c => `
-        <div class="course-card">
-            <img src="${c.thumb}" class="thumb">
-            <div class="info">
-                <span class="badge ${c.type.toLowerCase()}">${c.type}</span>
-                <h2 style="text-align:left; margin:15px 0; font-weight:800; color:var(--dark); font-size:20px;">${c.title}</h2>
-                ${c.locked ? `<button class="btn btn-primary" onclick="showPay()">Unlock - Rs. ${c.price}</button>` : 
-                    c.content.map(l => `
-                        <div class="video-box">
-                            <b style="font-size:14px; display:block; margin-bottom:10px;">${l.title}</b>
-                            <iframe src="${l.link}" allowfullscreen></iframe>
-                        </div>
-                    `).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-
-// Utility functions
-function showSignup(is) {
-    document.getElementById('login-group').classList.toggle('hidden', is);
-    document.getElementById('signup-group').classList.toggle('hidden', !is);
-    document.getElementById('title').innerText = is ? "Create BhattiPedia Account" : "Login to Your Account";
-}
-function showPay() { document.getElementById('pay-modal').classList.remove('hidden'); }
-function hidePay() { document.getElementById('pay-modal').classList.add('hidden'); }
-function logout() { localStorage.clear(); location.reload(); }
-function forgot() { window.open("https://wa.me/923097247244?text=Forgot%20BhattiPedia%20Password%20For%20Email:"); }
-
+    function showPay() { document.getElementById('pay-modal').classList.remove('hidden'); }
+    function hidePay() { document.getElementById('pay-modal').classList.add('hidden'); }
+    function logout() { localStorage.clear(); location.reload(); }
+    function forgot() { window.open("https://wa.me/923097247244?text=Forgot%20BhattiPedia%20Password%20For%20Email:"); }
 </script>
 </body>
 </html>
