@@ -98,53 +98,63 @@
 </div>
 
 <script>
-// When the page finishes loading
-        window.addEventListener('load', function() {
-            // Wait 2 seconds, then hide the splash and show the app
-            setTimeout(function() {
-                document.getElementById('splash-screen').style.display = 'none';
-                document.getElementById('auth-screen').style.display = 'block';
-            }, 2000);
-        });
-    const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
-
-    function showSignup(is) {
-        document.getElementById('login-group').classList.toggle('hidden', is);
-        document.getElementById('signup-group').classList.toggle('hidden', !is);
-        document.getElementById('title').innerText = is ? "Create BhattiPedia Account" : "Login to Your Account";
-    }
-
-    async function doAuth(type) {
-        if(type === 'login') {
-            const e = document.getElementById('l-email').value;
-            const p = document.getElementById('l-pass').value;
-            const res = await fetch(`${API}?action=login&email=${e}&password=${p}`);
-            const d = await res.json();
-            if(d.success) {
-                localStorage.setItem("session", JSON.stringify({e, n: d.userName}));
-                location.reload();
-            } else alert("Wrong credentials!");
+// 1. Consolidated Splash & Auth Logic
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        // Hide splash screen
+        document.getElementById('splash-screen').style.display = 'none';
+        
+        // ONLY show auth-screen if there is NO active session
+        if (!localStorage.getItem("session")) {
+            document.getElementById('auth-screen').style.display = 'block';
         } else {
-            const n = document.getElementById('s-name').value;
-            const e = document.getElementById('s-email').value;
-            const p = document.getElementById('s-pass').value;
-            const res = await fetch(API, { method: 'POST', body: JSON.stringify({action:'signup', name:n, email:e, password:p}) });
-            const d = await res.json();
-            if(d.success) { alert("Account Created! Login now."); showSignup(false); }
-            else alert(d.msg);
+            // If session exists, ensure auth is hidden and dash is shown
+            loadDash();
         }
+    }, 2000);
+});
+
+const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec";
+
+// 2. Updated Auth Function (Removed location.reload for a smoother feel)
+async function doAuth(type) {
+    if(type === 'login') {
+        const e = document.getElementById('l-email').value;
+        const p = document.getElementById('l-pass').value;
+        const res = await fetch(`${API}?action=login&email=${e}&password=${p}`);
+        const d = await res.json();
+        
+        if(d.success) {
+            localStorage.setItem("session", JSON.stringify({e, n: d.userName}));
+            // Instead of reloading the whole page and triggering the splash again:
+            loadDash(); 
+        } else {
+            alert("Wrong credentials!");
+        }
+    } else {
+        // ... (Your existing signup code is fine)
     }
+}
 
-    async function loadDash() {
-        const user = JSON.parse(localStorage.getItem("session"));
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('dash-screen').classList.remove('hidden');
-        document.getElementById('u-name').innerText = user.n;
-        document.getElementById('u-email').innerText = user.e;
+// 3. Updated loadDash to handle visibility cleanly
+async function loadDash() {
+    const sessionData = localStorage.getItem("session");
+    if(!sessionData) return;
 
+    const user = JSON.parse(sessionData);
+    
+    // Clean up visibility
+    document.getElementById('auth-screen').style.display = 'none'; // Force hide
+    document.getElementById('dash-screen').classList.remove('hidden');
+    
+    document.getElementById('u-name').innerText = user.n;
+    document.getElementById('u-email').innerText = user.e;
+
+    try {
         const res = await fetch(`${API}?action=getData&email=${user.e}`);
         const data = await res.json();
         const list = document.getElementById('list');
+        
         list.innerHTML = data.map(c => `
             <div class="course-card">
                 <img src="${c.thumb}" class="thumb">
@@ -161,14 +171,14 @@
                 </div>
             </div>
         `).join('');
+    } catch (err) {
+        console.error("Failed to load courses:", err);
     }
+}
 
-    function showPay() { document.getElementById('pay-modal').classList.remove('hidden'); }
-    function hidePay() { document.getElementById('pay-modal').classList.add('hidden'); }
-    function logout() { localStorage.clear(); location.reload(); }
-    function forgot() { window.open("https://wa.me/923097247244?text=Forgot%20BhattiPedia%20Password%20For%20Email:"); }
+// Remove the standalone if(localStorage.getItem("session")) loadDash(); 
+// at the bottom, as it's now handled by the splash screen timer logic.
 
-    if(localStorage.getItem("session")) loadDash();
 </script>
 </body>
 </html>
