@@ -3,293 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoursePedia</title>
+    <title>CoursePedia - MS Mukhtar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .splash-screen { background: #2196f3; transition: ease; }
         .hidden { display: none; }
-        .card-anim:hover { transform: translateY(-5px); transition: 0.3s; }
-        iframe { width: 100%; aspect-ratio: 16/9; border-radius: 12px; }
+        .bg-main { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+<body class="bg-main font-sans text-slate-800">
 
-    <div id="splash" class="splash-screen fixed inset-0 z-[100] flex flex-col items-center justify-center">
-        <img src="Assets/logo.png" alt="Logo" class="w-24 h-24 mb-4 animate-bounce">
-        <h1 class="text-4xl font-black text-slate-600">CoursePedia</h1>
+    <div id="splash" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center transition-opacity duration-1000">
+        <h1 class="text-4xl font-black text-blue-600 animate-pulse">CoursePedia</h1>
+        <p class="text-slate-400 mt-2 text-sm tracking-widest uppercase">BhattiPedia</p>
     </div>
 
-    <div id="authArea" class="hidden min-h-screen flex items-center justify-center p-6">
-        <div id="loginForm" class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
-            <h2 class="text-3xl font-black mb-8 text-center text-blue-600">Welcome</h2>
-            <input id="lEmail" type="email" placeholder="UserEmail" class="w-full p-4 border rounded-xl mb-4 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-400">
-            <input id="lPass" type="password" placeholder="Password" class="w-full p-4 border rounded-xl mb-6 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-400">
-            <button onclick="auth('user')" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold text-lg shadow-lg">Login</button>
-            <div class="mt-10 flex flex-wrap justify-between text-[11px] font-black uppercase text-slate-400">
-                <button onclick="switchAuth('signupForm')" class="hover:text-blue-600">Create Account</button>
-                <button onclick="wa('forgot')" class="hover:text-blue-600">Forgot Password</button>
-                <button onclick="switchAuth('adminForm')" class="hover:text-slate-900">Admin Portal</button>
+    <div id="authBox" class="hidden min-h-screen flex items-center justify-center p-6">
+        <div id="loginForm" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm border border-slate-100">
+            <h2 class="text-2xl font-black mb-6 text-blue-600">Login</h2>
+            <input id="email" type="email" placeholder="Email" class="w-full p-3 border rounded-xl mb-3 bg-slate-50">
+            <input id="pass" type="password" placeholder="Password" class="w-full p-3 border rounded-xl mb-6 bg-slate-50">
+            <button onclick="handleLogin('user')" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold">Login</button>
+            <div class="mt-6 flex justify-between text-xs font-bold text-blue-500 uppercase">
+                <button onclick="toggleAuth('signupForm')">Signup</button>
+                <button onclick="toggleAuth('adminForm')">Admin Portal</button>
             </div>
         </div>
 
-        <div id="signupForm" class="hidden bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-            <h2 class="text-3xl font-black mb-8 text-center text-green-600">Signup</h2>
-            <input id="rName" type="text" placeholder="Full Name" class="w-full p-4 border rounded-xl mb-3">
-            <input id="rEmail" type="email" placeholder="UserEmail" class="w-full p-4 border rounded-xl mb-3">
-            <input id="rPass" type="password" placeholder="Password" class="w-full p-4 border rounded-xl mb-3">
-            <input id="rMob" type="text" placeholder="Mobile No" class="w-full p-4 border rounded-xl mb-6">
-            <button onclick="signup()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold">Register Now</button>
-            <button onclick="switchAuth('loginForm')" class="w-full mt-4 text-slate-400 font-bold text-xs uppercase">Cancel</button>
+        <div id="signupForm" class="hidden bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
+            <h2 class="text-2xl font-black mb-6 text-green-600">Register</h2>
+            <input id="sName" placeholder="Name" class="w-full p-3 border rounded-xl mb-2">
+            <input id="sEmail" placeholder="Email" class="w-full p-3 border rounded-xl mb-2">
+            <input id="sPass" type="password" placeholder="Password" class="w-full p-3 border rounded-xl mb-2">
+            <input id="sMob" placeholder="Mobile" class="w-full p-3 border rounded-xl mb-6">
+            <button onclick="handleSignup()" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold">Create Account</button>
+            <button onclick="toggleAuth('loginForm')" class="mt-4 text-xs w-full text-slate-400">Back</button>
         </div>
 
-        <div id="adminForm" class="hidden bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-            <h2 class="text-3xl font-black mb-8 text-center text-slate-800">Admin Access</h2>
-            <input id="aEmail" type="email" placeholder="Admin Email" class="w-full p-4 border rounded-xl mb-4">
-            <input id="aPass" type="password" placeholder="Admin Password" class="w-full p-4 border rounded-xl mb-6">
-            <button onclick="auth('admin')" class="w-full bg-slate-800 text-white p-4 rounded-xl font-bold">Login Dashboard</button>
-            <button onclick="switchAuth('loginForm')" class="w-full mt-4 text-slate-400 font-bold text-xs uppercase">Back</button>
+        <div id="adminForm" class="hidden bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
+            <h2 class="text-2xl font-black mb-6 text-slate-800">Admin</h2>
+            <input id="aEmail" placeholder="Admin Email" class="w-full p-3 border rounded-xl mb-2">
+            <input id="aPass" type="password" placeholder="Admin Password" class="w-full p-3 border rounded-xl mb-6">
+            <button onclick="handleLogin('admin')" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold">Enter Dashboard</button>
+            <button onclick="toggleAuth('loginForm')" class="mt-4 text-xs w-full text-slate-400">Cancel</button>
         </div>
     </div>
 
-    <div id="homeArea" class="hidden min-h-screen pb-20">
-        <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 p-5 border-b">
-            <div class="max-w-6xl mx-auto flex justify-between items-center">
-                <span class="text-2xl font-black text-blue-600 italic">CoursePedia</span>
-                <button onclick="location.reload()" class="bg-slate-100 text-[10px] font-black px-4 py-2 rounded-full text-slate-500 uppercase">Logout</button>
-            </div>
+    <div id="homeUI" class="hidden min-h-screen">
+        <nav class="bg-white p-4 border-b flex justify-between items-center sticky top-0 z-50">
+            <span class="font-black text-xl text-blue-600">CoursePedia</span>
+            <button onclick="location.reload()" class="text-xs font-bold text-slate-400 uppercase">Logout</button>
         </nav>
-
-        <main class="max-w-6xl mx-auto p-6">
-            <div class="flex space-x-2 bg-slate-200 p-1.5 rounded-2xl mb-12 w-fit mx-auto">
-                <button onclick="render('all')" class="px-8 py-2.5 rounded-xl text-xs font-black uppercase focus:bg-white focus:shadow-md transition-all">All</button>
-                <button onclick="render('paid')" class="px-8 py-2.5 rounded-xl text-xs font-black uppercase focus:bg-white focus:shadow-md transition-all">Paid</button>
-                <button onclick="render('free')" class="px-8 py-2.5 rounded-xl text-xs font-black uppercase focus:bg-white focus:shadow-md transition-all">Free</button>
-            </div>
-            <div id="courseContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        </main>
-
-        <footer class="mt-20 border-t p-12 text-center bg-white">
-            <p class="font-black text-slate-300 text-[11px] uppercase tracking-widest mb-4">Build by BhattiPedia</p>
-            <div class="flex justify-center space-x-6">
-                <button onclick="wa('support')" class="bg-green-500 text-white px-8 py-3 rounded-full text-xs font-black uppercase shadow-lg shadow-green-100">WhatsApp</button>
-                <button onclick="sendAppMsg()" class="bg-blue-500 text-white px-8 py-3 rounded-full text-xs font-black uppercase shadow-lg shadow-blue-100">Message Admin</button>
-            </div>
-        </footer>
+        <div class="max-w-6xl mx-auto p-6">
+            <div id="courseGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </div>
     </div>
 
-    <div id="paymentModal" class="hidden fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div class="bg-blue-600 p-8 text-white text-center">
-                <h3 class="text-2xl font-black">Complete Your Payment</h3>
-                <p class="opacity-80 text-sm mt-1">Please pay the amount to any account below</p>
+    <div id="paymentUI" class="hidden fixed inset-0 z-[110] bg-white flex items-center justify-center p-6">
+        <div class="max-w-md w-full bg-slate-50 p-8 rounded-3xl border">
+            <h2 class="text-2xl font-black mb-6">Payment Details</h2>
+            <div class="space-y-4 text-sm">
+                <div class="bg-white p-4 rounded-xl border">
+                    <p class="font-bold text-blue-600">EasyPaisa / JazzCash</p>
+                    <p class="text-lg font-black">0309 7247244</p>
+                    <p class="text-xs text-slate-400">Muhammad Sajid Mukhtar</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border">
+                    <p class="font-bold text-blue-600">Allied Bank</p>
+                    <p class="text-xs font-mono break-all">PK15ABPA0010129872550013</p>
+                    <p class="text-xs text-slate-400">Muhammad Sajid Mukhtar</p>
+                </div>
             </div>
-            <div class="p-8 space-y-6">
-                <div class="border-b pb-4">
-                    <p class="text-xs font-black text-blue-500 uppercase mb-2">EasyPaisa / JazzCash</p>
-                    <p class="font-bold text-lg">Muhammad Sajid Mukhtar</p>
-                    <p class="text-2xl font-black text-slate-800 tracking-wider">0309 7247244</p>
-                </div>
-                <div>
-                    <p class="text-xs font-black text-blue-500 uppercase mb-2">Allied Bank (ABL)</p>
-                    <p class="font-bold text-lg">Muhammad Sajid Mukhtar</p>
-                    <p class="font-mono text-sm bg-slate-50 p-3 rounded-lg border break-all">PK15ABPA0010129872550013</p>
-                </div>
-                <div class="pt-4 flex flex-col gap-3">
-                    <button id="paySubmitBtn" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black uppercase shadow-xl shadow-green-100">I have sent the payment</button>
-                    <button onclick="closePayment()" class="w-full text-slate-400 font-bold text-xs uppercase">Cancel</button>
-                </div>
+            <button id="waBtn" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold mt-8">I have paid (WhatsApp)</button>
+            <button onclick="closePayment()" class="w-full mt-4 text-slate-400 text-xs font-bold uppercase">Cancel</button>
+        </div>
+    </div>
+
+    <div id="lessonUI" class="hidden min-h-screen p-6 bg-white">
+        <button onclick="closeLessons()" class="mb-6 font-bold text-blue-600 uppercase text-xs">← Back</button>
+        <div id="lessonList" class="max-w-2xl mx-auto space-y-4"></div>
+    </div>
+
+    <div id="adminUI" class="hidden min-h-screen p-8 bg-slate-50">
+        <h1 class="text-3xl font-black mb-8">Admin Dashboard</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl border">
+                <h3 class="font-bold mb-4">Approve User Access</h3>
+                <input id="adEmail" placeholder="User Email" class="w-full p-2 border mb-2 rounded">
+                <input id="adCID" placeholder="Course ID" class="w-full p-2 border mb-4 rounded">
+                <button onclick="adminAction('approveCourse')" class="w-full bg-green-600 text-white p-2 rounded font-bold">Grant Access</button>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border">
+                <h3 class="font-bold mb-4">Add Content</h3>
+                <button onclick="promptAdd('course')" class="w-full bg-slate-100 p-2 rounded mb-2 text-sm font-bold">+ New Course</button>
+                <button onclick="promptAdd('lesson')" class="w-full bg-slate-100 p-2 rounded text-sm font-bold">+ New Lesson</button>
             </div>
         </div>
     </div>
 
-    <div id="lessonArea" class="hidden min-h-screen p-6 bg-white">
-        <div class="max-w-4xl mx-auto">
-            <button onclick="closeLessons()" class="mb-8 font-black text-blue-600 text-xs uppercase tracking-widest flex items-center">← Back to Courses</button>
-            <h2 id="viewCourseTitle" class="text-4xl font-black mb-10 tracking-tighter"></h2>
-            <div id="lessonList" class="grid gap-4"></div>
-        </div>
-    </div>
-
-    <div id="player" class="hidden fixed inset-0 z-[120] bg-black/98 flex items-center justify-center p-4">
-        <div class="w-full max-w-5xl">
-            <div id="videoBox" class="rounded-2xl overflow-hidden bg-slate-900 border border-slate-800"></div>
-            <button onclick="closeVideo()" class="mt-8 bg-red-600 text-white px-12 py-4 rounded-full font-black mx-auto block uppercase text-xs tracking-widest">Close Player</button>
-        </div>
-    </div>
-
-    <div id="adminPanel" class="hidden p-8 max-w-6xl mx-auto min-h-screen">
-        <h1 class="text-5xl font-black mb-12 text-slate-800 tracking-tighter">Dashboard</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                <h4 class="text-blue-500 font-black text-xs uppercase mb-6 tracking-widest">Users & Access</h4>
-                <input id="adTarget" placeholder="UserEmail" class="w-full p-4 border rounded-xl mb-3">
-                <input id="adVal" placeholder="New Pass / Course ID" class="w-full p-4 border rounded-xl mb-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="admOp('changePass')" class="bg-slate-800 text-white py-4 rounded-xl text-[11px] font-black uppercase">Update Pass</button>
-                    <button onclick="admOp('approveCourse')" class="bg-blue-600 text-white py-4 rounded-xl text-[11px] font-black uppercase">Approve Access</button>
-                </div>
-            </div>
-            <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                <h4 class="text-orange-500 font-black text-xs uppercase mb-6 tracking-widest">Add Content</h4>
-                <div class="flex flex-col gap-3">
-                    <button onclick="addDialog('course')" class="bg-slate-100 text-slate-700 py-4 rounded-xl text-[11px] font-black uppercase">+ Create New Course</button>
-                    <button onclick="addDialog('lesson')" class="bg-slate-100 text-slate-700 py-4 rounded-xl text-[11px] font-black uppercase">+ Add Lesson to Course</button>
-                    <div class="mt-4 pt-4 border-t">
-                        <input id="adRem" placeholder="Course ID to Delete" class="w-full p-4 border rounded-xl mb-2">
-                        <button onclick="admOp('removeCourse')" class="w-full bg-red-50 text-red-500 py-4 rounded-xl text-[11px] font-black uppercase">Delete Entire Course</button>
-                    </div>
-                </div>
-            </div>
+    <div id="player" class="hidden fixed inset-0 bg-black z-[200] flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+            <div id="videoContainer"></div>
+            <button onclick="closeVideo()" class="mt-4 bg-white px-8 py-2 rounded-full font-bold mx-auto block">Close</button>
         </div>
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec"; 
+        const API = "https://script.google.com/macros/s/AKfycbzFiyVuPyBe7k5-4seYr6Zyv_snZ-M11DanuZh6m3D9ZK1muzGmztVdST3cktNwBmNA/exec"; // REPLACE THIS!
         let user = null;
-        let db = { courses: [], lessons: [] };
+        let courses = [];
+        let lessons = [];
 
-        // 1. Splash & Startup
         window.onload = () => {
             setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
+                document.getElementById('splash').classList.add('opacity-0');
                 setTimeout(() => {
                     document.getElementById('splash').classList.add('hidden');
-                    document.getElementById('authArea').classList.remove('hidden');
-                }, 600);
+                    document.getElementById('authBox').classList.remove('hidden');
+                }, 1000);
             }, 5000);
         };
 
-        function switchAuth(id) {
+        function toggleAuth(id) {
             ['loginForm', 'signupForm', 'adminForm'].forEach(f => document.getElementById(f).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         }
 
-        async function api(data) {
-            const res = await fetch(API, { method: 'POST', body: JSON.stringify(data) });
-            return await res.json();
+        async function handleLogin(role) {
+            const email = role === 'user' ? document.getElementById('email').value : document.getElementById('aEmail').value;
+            const pass = role === 'user' ? document.getElementById('pass').value : document.getElementById('aPass').value;
+            
+            try {
+                const res = await fetch(API, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: role === 'user' ? 'userLogin' : 'adminLogin', email, pass })
+                });
+                const json = await res.json();
+                if(json.status === 'success') {
+                    if(role === 'user') { user = json.user; startApp(); }
+                    else { document.getElementById('authBox').classList.add('hidden'); document.getElementById('adminUI').classList.remove('hidden'); }
+                } else { alert(json.message); }
+            } catch (e) {
+                console.error(e);
+                alert("Connection Error. Check your Script Deployment settings.");
+            }
         }
 
-        async function auth(type) {
-            const email = type === 'user' ? document.getElementById('lEmail').value : document.getElementById('admEmail').value;
-            const pass = type === 'user' ? document.getElementById('lPass').value : document.getElementById('admPass').value;
-            const res = await api({ action: type === 'user' ? 'userLogin' : 'adminLogin', email, pass });
-            if(res.status === 'success') {
-                if(type === 'user') { user = res.user; alert('Login Successful.'); start(); }
-                else { document.getElementById('authArea').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); }
-            } else alert(res.message);
-        }
-
-        async function signup() {
-            const res = await api({
-                action: 'signup',
-                name: document.getElementById('rName').value,
-                email: document.getElementById('rEmail').value,
-                password: document.getElementById('rPass').value,
-                mobile: document.getElementById('rMob').value
-            });
-            alert(res.message);
-            if(res.status === 'success') switchAuth('loginForm');
-        }
-
-        async function start() {
-            document.getElementById('authArea').classList.add('hidden');
-            document.getElementById('homeArea').classList.remove('hidden');
-            const res = await api({ action: 'getData' });
-            db = { courses: res.courses, lessons: res.lessons };
+        async function startApp() {
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('homeUI').classList.remove('hidden');
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getData' })});
+            const json = await res.json();
+            courses = json.courses;
+            lessons = json.lessons;
             render('all');
         }
 
         function render(mode) {
-            const cont = document.getElementById('courseContainer');
-            cont.innerHTML = '';
-            
-            db.courses.filter(c => {
-                if(mode === 'free') return c[2] === 'Free';
-                if(mode === 'paid') return user.purchased.split(',').includes(String(c[0]));
-                return true;
-            }).forEach(c => {
+            const grid = document.getElementById('courseGrid');
+            grid.innerHTML = '';
+            courses.forEach(c => {
                 const isPaid = user.purchased.split(',').includes(String(c[0]));
                 const isFree = c[2] === 'Free';
                 const card = document.createElement('div');
-                card.className = "bg-white p-8 rounded-[2rem] border border-slate-100 card-anim shadow-sm";
+                card.className = "bg-white p-6 rounded-3xl border border-slate-100 shadow-sm";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="text-[9px] font-black px-3 py-1 bg-slate-100 text-slate-500 rounded-full uppercase tracking-tighter">${c[2]}</span>
-                        <span class="text-[9px] text-slate-300 font-bold uppercase">ID: ${c[0]}</span>
-                    </div>
-                    <h3 class="text-2xl font-black mb-6 leading-tight">${c[1]}</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">${c[2]} | ID: ${c[0]}</p>
+                    <h3 class="text-xl font-black mb-6">${c[1]}</h3>
                     ${(isFree || isPaid) ? 
-                        `<button onclick="openLessons('${c[0]}','${c[1]}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-50">Open Content</button>` :
-                        `<div><p class="text-blue-600 font-black text-3xl mb-4">Rs. ${c[3]}</p>
-                         <button onclick="openPayment('${c[0]}','${c[1]}')" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-xs uppercase shadow-xl shadow-orange-50">Purchase Course</button></div>`
+                        `<button onclick="openLessons('${c[0]}','${c[1]}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Open Course</button>` :
+                        `<div><p class="text-blue-600 font-black text-xl mb-3">Rs. ${c[3]}</p>
+                         <button onclick="openPayment('${c[0]}','${c[1]}')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold">Buy Now</button></div>`
                     }
                 `;
-                cont.appendChild(card);
+                grid.appendChild(card);
             });
         }
 
         function openPayment(id, name) {
-            document.getElementById('paymentModal').classList.remove('hidden');
-            document.getElementById('paySubmitBtn').onclick = () => {
-                const text = `Hi Admin, I have sent payment for Course: ${name} (ID: ${id}). My Registered Email: ${user.email}. Please approve my access.`;
-                window.open(`https://wa.me/923127030379?text=${encodeURIComponent(text)}`);
+            document.getElementById('paymentUI').classList.remove('hidden');
+            document.getElementById('waBtn').onclick = () => {
+                window.open(`https://wa.me/923127030379?text=I paid for Course: ${name} (ID: ${id}). Email: ${user.email}`);
             };
         }
-
-        function closePayment() { document.getElementById('paymentModal').classList.add('hidden'); }
+        function closePayment() { document.getElementById('paymentUI').classList.add('hidden'); }
 
         function openLessons(id, title) {
-            document.getElementById('homeArea').classList.add('hidden');
-            document.getElementById('lessonArea').classList.remove('hidden');
-            document.getElementById('viewCourseTitle').innerText = title;
+            document.getElementById('homeUI').classList.add('hidden');
+            document.getElementById('lessonUI').classList.remove('hidden');
             const list = document.getElementById('lessonList');
-            list.innerHTML = '';
-            
-            db.lessons.filter(l => l[0] == id).forEach(l => {
-                const d = document.createElement('div');
-                d.className = "bg-slate-50 p-5 rounded-2xl flex items-center gap-5 cursor-pointer hover:bg-blue-50 transition border border-transparent hover:border-blue-100";
-                d.onclick = () => { document.getElementById('videoBox').innerHTML = l[4]; document.getElementById('player').classList.remove('hidden'); };
-                d.innerHTML = `
-                    <img src="${l[3]}" class="w-32 aspect-video rounded-xl object-cover bg-slate-200 shadow-sm">
-                    <div>
-                        <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Part ${l[1]}</p>
-                        <h4 class="text-lg font-bold text-slate-800 leading-snug">${l[2]}</h4>
-                    </div>
-                `;
-                list.appendChild(d);
+            list.innerHTML = `<h2 class="text-2xl font-black mb-6">${title}</h2>`;
+            lessons.filter(l => l[0] == id).forEach(l => {
+                const item = document.createElement('div');
+                item.className = "flex items-center gap-4 bg-slate-50 p-4 rounded-2xl cursor-pointer";
+                item.onclick = () => { document.getElementById('videoContainer').innerHTML = l[4]; document.getElementById('player').classList.remove('hidden'); };
+                item.innerHTML = `<img src="${l[3]}" class="w-20 h-12 rounded-lg bg-slate-200"><div><p class="text-xs font-bold text-blue-500">Lesson ${l[1]}</p><h4 class="font-bold">${l[2]}</h4></div>`;
+                list.appendChild(item);
             });
         }
 
-        function closeLessons() { document.getElementById('lessonArea').classList.add('hidden'); document.getElementById('homeArea').classList.remove('hidden'); }
-        function closeVideo() { document.getElementById('videoBox').innerHTML = ''; document.getElementById('player').classList.add('hidden'); }
+        function closeLessons() { document.getElementById('lessonUI').classList.add('hidden'); document.getElementById('homeUI').classList.remove('hidden'); }
+        function closeVideo() { document.getElementById('videoContainer').innerHTML = ''; document.getElementById('player').classList.add('hidden'); }
 
-        function wa(type) {
-            let m = type === 'forgot' ? "I forgot my password, my username: ___ my email: ___" : "Hi BhattiPedia Support, I need help with...";
-            window.open(`https://wa.me/923127030379?text=${encodeURIComponent(m)}`);
+        async function adminAction(sub) {
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify({ 
+                action: 'adminAction', sub: sub, target: document.getElementById('adEmail').value, id: document.getElementById('adCID').value 
+            })});
+            const json = await res.json();
+            alert(json.message);
         }
 
-        async function sendAppMsg() {
-            const t = prompt("Message for Support:");
-            if(t) { await api({ action: 'submitMsg', email: user.email, message: t }); alert("Sent to Admin."); }
-        }
-
-        async function admOp(sub) {
-            const res = await api({ action: 'adminAction', subAction: sub, targetEmail: document.getElementById('adTarget').value, newPass: document.getElementById('adVal').value, courseID: document.getElementById('adVal').value, id: document.getElementById('adRem').value });
-            alert(res.message);
-        }
-
-        async function addDialog(type) {
+        async function promptAdd(type) {
+            const action = { action: 'adminAction', sub: type === 'course' ? 'addCourse' : 'addLesson' };
             if(type === 'course') {
-                const id = prompt("Course ID:"); const name = prompt("Course Name:");
-                const t = prompt("Type (Free/Premium):"); const p = prompt("Price (Rs):");
-                await api({ action: 'adminAction', subAction: 'addCourse', id, name, type: t, price: p });
+                action.id = prompt("ID:"); action.name = prompt("Name:"); action.type = prompt("Free/Premium:"); action.price = prompt("Price:");
             } else {
-                const id = prompt("Course ID:"); const num = prompt("Lesson No:");
-                const title = prompt("Lesson Title:"); const thumb = prompt("Thumb URL:");
-                const link = prompt("Embed (<iframe>):");
-                await api({ action: 'adminAction', subAction: 'addLesson', id, num, title, thumb, link });
+                action.id = prompt("Course ID:"); action.num = prompt("Lesson No:"); action.title = prompt("Title:"); action.thumb = prompt("Thumb URL:"); action.link = prompt("Embed Code:");
             }
-            alert("Entry Saved.");
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify(action)});
+            alert("Done");
         }
     </script>
 </body>
