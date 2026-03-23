@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title></title> <!-- Empty title removes browser tab text -->
+    <title></title>
     <style>
+        /* All existing styles remain exactly as before */
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +15,6 @@
         body {
             background: #f5f5f5;
         }
-        /* Splash screen */
         #splash {
             position: fixed;
             top: 0;
@@ -36,14 +36,12 @@
             0% { transform: translateY(0); }
             100% { transform: translateY(-20px); }
         }
-        /* Main container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             display: none;
         }
-        /* Login & Signup forms */
         .form-box {
             background: white;
             padding: 30px;
@@ -78,7 +76,6 @@
             text-decoration: none;
             margin: 0 10px;
         }
-        /* Dashboard tabs */
         .tabs {
             display: flex;
             justify-content: space-around;
@@ -136,7 +133,6 @@
             margin-top: 10px;
             width: 100%;
         }
-        /* Menu (three lines) */
         .menu-icon {
             position: fixed;
             top: 20px;
@@ -185,7 +181,6 @@
             z-index: 150;
             display: none;
         }
-        /* Payment page */
         .payment-form {
             max-width: 500px;
             margin: 20px auto;
@@ -198,7 +193,6 @@
             padding: 10px;
             margin: 10px 0;
         }
-        /* Messages */
         .message-thread {
             background: white;
             border-radius: 10px;
@@ -213,7 +207,6 @@
             background: #f5f5f5;
             margin-right: 20px;
         }
-        /* Modal base */
         .modal {
             display: none;
             position: fixed;
@@ -272,7 +265,6 @@
             margin: 10px 0;
             text-align: center;
         }
-        /* Responsive */
         @media (max-width: 768px) {
             .courses-grid, .lessons-grid {
                 grid-template-columns: 1fr;
@@ -299,15 +291,15 @@
 
 <div id="appContainer" class="container"></div>
 
-<!-- Modal for video playback -->
+<!-- Video Modal -->
 <div id="videoModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeVideoModal()">✕</span>
-        <div id="videoContainer" style="width: 100%; height: 100%;"></div>
+        <div id="videoContainer" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: black;"></div>
     </div>
 </div>
 
-<!-- Modal for signup success (green) -->
+<!-- Signup Success Modal -->
 <div id="successModal" class="modal" style="background: rgba(0,0,0,0.5);">
     <div class="modal-content" style="background: #4CAF50; color: white; max-width: 350px; height: auto; border-radius: 10px;">
         <p id="modalMessage" style="margin: 20px;">Account created successfully, please Login now.</p>
@@ -315,7 +307,7 @@
     </div>
 </div>
 
-<!-- Modal for forgot password (blue) -->
+<!-- Forgot Password Modal -->
 <div id="forgotModal" class="modal" style="background: rgba(0,0,0,0.5);">
     <div class="modal-content" style="background: #e3f2fd; color: #333; max-width: 350px; height: auto; border-radius: 10px;">
         <h3>Reset Password</h3>
@@ -327,27 +319,32 @@
 </div>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzSD1y_9_-iCPfAjU28PnSVEcV2iRIFhnJtE0v_Qk6tobhEnEhYHzxBwEM1134tw83s/exec'; // Replace with your Apps Script web app URL
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzSD1y_9_-iCPfAjU28PnSVEcV2iRIFhnJtE0v_Qk6tobhEnEhYHzxBwEM1134tw83s/exec'; // Replace with your actual ID
 
     let currentUser = null;
     let currentPage = 'login';
 
-    // Simple fetch wrapper without extra headers
-    async function callApi(data) {
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return await response.json();
-        } catch (err) {
-            console.error('API error:', err);
-            throw err;
+    // Simple API call with error logging
+    async function callApi(data, retries = 1) {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                console.log('API success:', data.action, result);
+                return result;
+            } catch (err) {
+                console.error(`API call attempt ${attempt+1} failed:`, err);
+                if (attempt === retries) throw err;
+                await new Promise(r => setTimeout(r, 1000));
+            }
         }
     }
 
-    // Splash screen
+    // Splash
     setTimeout(() => {
         document.getElementById('splash').style.opacity = '0';
         setTimeout(() => {
@@ -480,7 +477,7 @@
         showLogin();
     }
 
-    // Forgot password functions
+    // Forgot password
     function showForgotModal() {
         const modal = document.getElementById('forgotModal');
         const emailInput = document.getElementById('forgotEmail');
@@ -599,7 +596,7 @@
         container.innerHTML = html;
     }
 
-    // Show lessons for a course
+    // Lessons
     async function showLessons(courseId) {
         currentPage = 'lessons';
         try {
@@ -638,31 +635,58 @@
         }
     }
 
-    // Play lesson with fullscreen support
+    // Play lesson with robust iframe handling
     function playLesson(button) {
         const embedLink = button.getAttribute('data-embed');
         const modal = document.getElementById('videoModal');
         const container = document.getElementById('videoContainer');
         container.innerHTML = '';
 
-        if (!embedLink) {
+        if (!embedLink || embedLink.trim() === '') {
             container.innerHTML = '<p style="color:white;">No video link available.</p>';
             modal.style.display = 'flex';
             return;
         }
 
-        // Ensure the iframe is set for fullscreen
-        let finalEmbed = embedLink;
+        console.log('Embed link:', embedLink);
+
+        // Function to create iframe with error handler
+        const createIframe = (src) => {
+            const iframe = document.createElement('iframe');
+            iframe.src = src;
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.onerror = () => {
+                container.innerHTML = '<p style="color:red;">Failed to load video. Please check the link.</p>';
+            };
+            return iframe;
+        };
+
+        let iframe;
         if (embedLink.includes('<iframe')) {
-            // Add allowfullscreen attribute if missing
-            if (!embedLink.includes('allowfullscreen') && !embedLink.includes('allow="fullscreen"')) {
-                finalEmbed = embedLink.replace('<iframe', '<iframe allow="fullscreen" allowfullscreen');
+            // Extract src from iframe string
+            const srcMatch = embedLink.match(/src=["']([^"']+)["']/);
+            if (srcMatch && srcMatch[1]) {
+                iframe = createIframe(srcMatch[1]);
+            } else {
+                // Fallback: try to embed the raw HTML
+                container.innerHTML = embedLink;
+                modal.style.display = 'flex';
+                return;
             }
         } else if (embedLink.startsWith('http')) {
-            finalEmbed = `<iframe src="${embedLink}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen style="width:100%; height:100%;"></iframe>`;
+            iframe = createIframe(embedLink);
+        } else {
+            // Unknown format, just show as text
+            container.innerHTML = `<p style="color:white;">Invalid video link format: ${embedLink}</p>`;
+            modal.style.display = 'flex';
+            return;
         }
 
-        container.innerHTML = finalEmbed;
+        container.appendChild(iframe);
         modal.style.display = 'flex';
     }
 
@@ -673,6 +697,7 @@
         modal.style.display = 'none';
     }
 
+    // Payment and other functions (unchanged)
     function buyCourse(courseId) {
         sessionStorage.setItem('buyCourseId', courseId);
         showPayment();
