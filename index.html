@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title></title> <!-- Empty title removes browser tab text -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+        }
+        /* Splash screen */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #a8e6cf, #d4f1f9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        .logo {
+            width: 250px;
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-20px); }
+        }
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+        }
+        /* Login & Signup forms */
+        .form-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        .form-box input, .form-box select, .form-box button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-box button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-box button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .link a {
+            color: #4CAF50;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        /* Dashboard tabs */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tab.active {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+        }
+        .courses-grid, .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .course-card, .lesson-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .course-card:hover, .lesson-card:hover {
+            transform: translateY(-5px);
+        }
+        .course-card img, .lesson-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .course-card .info, .lesson-card .info {
+            padding: 15px;
+        }
+        .course-card .title, .lesson-card .title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .course-card .price {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .course-card button, .lesson-card button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        /* Menu (three lines) */
+        .menu-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 100;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: #333;
+            color: white;
+            transition: left 0.3s;
+            z-index: 200;
+            padding-top: 60px;
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .side-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px solid #444;
+        }
+        .side-menu a:hover {
+            background: #4CAF50;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+            display: none;
+        }
+        /* Payment page */
+        .payment-form {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .payment-form select, .payment-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        /* Messages */
+        .message-thread {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .message-sent {
+            background: #e3f2fd;
+            margin-left: 20px;
+        }
+        .message-received {
+            background: #f5f5f5;
+            margin-right: 20px;
+        }
+        /* Modal base */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #000;
+            border-radius: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: black;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            z-index: 2100;
+            background: rgba(0,0,0,0.6);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-modal:hover {
+            background: red;
+        }
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .courses-grid, .lessons-grid {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="splash">
+    <img src="Assets/logo.png" alt="Logo" class="logo">
+</div>
+<div id="menuIcon" class="menu-icon" onclick="toggleMenu()">☰</div>
+<div id="sideMenu" class="side-menu">
+    <a href="#" onclick="showInbox()">Inbox</a>
+    <a href="#" onclick="contactSupport()">Contact Support</a>
+    <a href="#" onclick="showAbout()">About Us</a>
+    <a href="#" onclick="logout()">Logout</a>
+</div>
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+<div id="appContainer" class="container"></div>
+
+<!-- Modal for video playback -->
+<div id="videoModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeVideoModal()">✕</span>
+        <div id="videoContainer" style="width: 100%; height: 100%;"></div>
+    </div>
+</div>
+
+<!-- Modal for signup success (green) -->
+<div id="successModal" class="modal" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background: #4CAF50; color: white; max-width: 350px; height: auto; border-radius: 10px;">
+        <p id="modalMessage" style="margin: 20px;">Account created successfully, please Login now.</p>
+        <button onclick="closeModalAndRedirect()" style="background: white; color: #4CAF50; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">OK</button>
+    </div>
+</div>
+
+<!-- Modal for forgot password (blue) -->
+<div id="forgotModal" class="modal" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background: #e3f2fd; color: #333; max-width: 350px; height: auto; border-radius: 10px;">
+        <h3>Reset Password</h3>
+        <input type="email" id="forgotEmail" placeholder="Enter your email" autocomplete="off" style="width: 90%; padding: 10px; margin: 10px auto;">
+        <button id="sendBtn" onclick="sendForgotRequest()" disabled style="background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px;">Send</button>
+        <div id="forgotMessage" class="message-banner" style="display: none; margin: 10px;"></div>
+        <button onclick="closeForgotModal()" style="background:#f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px;">Close</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzSD1y_9_-iCPfAjU28PnSVEcV2iRIFhnJtE0v_Qk6tobhEnEhYHzxBwEM1134tw83s/exec'; // Replace with your Apps Script web app URL
+
+    let currentUser = null;
+    let currentPage = 'login';
+
+    // Simple fetch wrapper without extra headers
+    async function callApi(data) {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        } catch (err) {
+            console.error('API error:', err);
+            throw err;
+        }
+    }
+
+    // Splash screen
+    setTimeout(() => {
+        document.getElementById('splash').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            checkSession();
+        }, 500);
+    }, 5000);
+
+    function checkSession() {
+        const user = sessionStorage.getItem('user');
+        const container = document.getElementById('appContainer');
+        container.style.display = 'block';
+        if (user) {
+            currentUser = JSON.parse(user);
+            document.getElementById('menuIcon').style.display = 'block';
+            showDashboard();
+        } else {
+            document.getElementById('menuIcon').style.display = 'none';
+            showLogin();
+        }
+    }
+
+    function toggleMenu() {
+        const menu = document.getElementById('sideMenu');
+        const overlay = document.getElementById('overlay');
+        menu.classList.toggle('open');
+        overlay.style.display = menu.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function showLogin() {
+        currentPage = 'login';
+        document.getElementById('appContainer').innerHTML = `
+            <div class="form-box">
+                <h2>Login</h2>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button onclick="login('user')">User Login</button>
+                <button onclick="login('admin')">Admin Login</button>
+                <div class="link">
+                    <a href="#" onclick="showSignup()">Signup</a>
+                    <a href="#" onclick="showForgotModal()">Forgot Password?</a>
+                </div>
+            </div>
+        `;
+    }
+
+    async function login(role) {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const data = await callApi({ action: 'login', email, password, role });
+            if (data.success) {
+                if (role === 'admin') {
+                    window.location.href = 'admins.html';
+                } else {
+                    currentUser = data.user;
+                    sessionStorage.setItem('user', JSON.stringify(currentUser));
+                    document.getElementById('menuIcon').style.display = 'block';
+                    showDashboard();
+                }
+            } else {
+                alert(data.message);
+                showLogin();
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        }
+    }
+
+    function showSignup() {
+        currentPage = 'signup';
+        document.getElementById('appContainer').innerHTML = `
+            <div class="form-box">
+                <h2>Signup</h2>
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <label>
+                    <input type="checkbox" id="terms"> I accept the rules and regulations along with privacy policy.
+                </label>
+                <button id="signupBtn" disabled onclick="signup()">Signup</button>
+                <div class="link">
+                    <a href="#" onclick="showLogin()">Back to Login</a>
+                </div>
+            </div>
+        `;
+        const name = document.getElementById('name');
+        const email = document.getElementById('email');
+        const pwd = document.getElementById('password');
+        const confirm = document.getElementById('confirmPassword');
+        const terms = document.getElementById('terms');
+        const btn = document.getElementById('signupBtn');
+        function validate() {
+            btn.disabled = !(name.value && email.value && pwd.value && confirm.value && pwd.value === confirm.value && terms.checked);
+        }
+        name.addEventListener('input', validate);
+        email.addEventListener('input', validate);
+        pwd.addEventListener('input', validate);
+        confirm.addEventListener('input', validate);
+        terms.addEventListener('change', validate);
+    }
+
+    async function signup() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const data = await callApi({ action: 'signup', name, email, password });
+            if (data.success) {
+                showModal(data.message);
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            alert('Network error: ' + err.message);
+        }
+    }
+
+    function showModal(message) {
+        const modal = document.getElementById('successModal');
+        const msgElement = document.getElementById('modalMessage');
+        msgElement.textContent = message;
+        modal.style.display = 'flex';
+    }
+
+    function closeModalAndRedirect() {
+        const modal = document.getElementById('successModal');
+        modal.style.display = 'none';
+        showLogin();
+    }
+
+    // Forgot password functions
+    function showForgotModal() {
+        const modal = document.getElementById('forgotModal');
+        const emailInput = document.getElementById('forgotEmail');
+        const sendBtn = document.getElementById('sendBtn');
+        const messageDiv = document.getElementById('forgotMessage');
+        emailInput.value = '';
+        sendBtn.disabled = true;
+        messageDiv.style.display = 'none';
+        messageDiv.innerHTML = '';
+        emailInput.oninput = function() {
+            sendBtn.disabled = !emailInput.value;
+        };
+        modal.style.display = 'flex';
+    }
+
+    function closeForgotModal() {
+        const modal = document.getElementById('forgotModal');
+        modal.style.display = 'none';
+    }
+
+    async function sendForgotRequest() {
+        const email = document.getElementById('forgotEmail').value;
+        if (!email) return;
+
+        const sendBtn = document.getElementById('sendBtn');
+        const messageDiv = document.getElementById('forgotMessage');
+        sendBtn.disabled = true;
+        messageDiv.style.display = 'block';
+        messageDiv.innerHTML = 'Sending...';
+        messageDiv.className = 'message-banner';
+
+        try {
+            const data = await callApi({ action: 'forgotPassword', email });
+            if (data.success) {
+                messageDiv.innerHTML = data.message;
+                messageDiv.className = 'message-banner success';
+            } else {
+                messageDiv.innerHTML = data.message;
+                messageDiv.className = 'message-banner error';
+                sendBtn.disabled = false;
+            }
+        } catch (err) {
+            messageDiv.innerHTML = 'Network error: ' + err.message;
+            messageDiv.className = 'message-banner error';
+            sendBtn.disabled = false;
+        }
+    }
+
+    // Dashboard and courses
+    async function showDashboard() {
+        currentPage = 'dashboard';
+        try {
+            const [coursesData, freeData, purchasedData] = await Promise.all([
+                callApi({ action: 'getCourses' }),
+                callApi({ action: 'getFreeCourses' }),
+                callApi({ action: 'getPurchasedCourses', email: currentUser.email })
+            ]);
+            const allCourses = coursesData.courses;
+            const freeCourses = freeData.courses;
+            const purchasedCourses = purchasedData.courses;
+
+            document.getElementById('appContainer').innerHTML = `
+                <div class="tabs">
+                    <div class="tab" onclick="showTab('free')">Free Courses</div>
+                    <div class="tab active" onclick="showTab('home')">Home</div>
+                    <div class="tab" onclick="showTab('purchased')">Purchased Courses</div>
+                </div>
+                <div id="coursesContainer"></div>
+            `;
+            window.allCourses = allCourses;
+            window.freeCourses = freeCourses;
+            window.purchasedCourses = purchasedCourses;
+            showTab('home');
+        } catch (err) {
+            console.error('Error loading dashboard:', err);
+            document.getElementById('appContainer').innerHTML = `
+                <div class="error-message">
+                    Failed to load courses. Please check your connection.<br>
+                    Error: ${err.message}
+                </div>
+            `;
+        }
+    }
+
+    function showTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        if (tab === 'free') document.querySelector('.tab:first-child').classList.add('active');
+        else if (tab === 'home') document.querySelector('.tab:nth-child(2)').classList.add('active');
+        else document.querySelector('.tab:last-child').classList.add('active');
+
+        let courses = [];
+        if (tab === 'free') courses = window.freeCourses;
+        else if (tab === 'home') courses = window.allCourses;
+        else courses = window.purchasedCourses;
+
+        const container = document.getElementById('coursesContainer');
+        if (!courses.length) {
+            container.innerHTML = '<p>No courses found.</p>';
+            return;
+        }
+        let html = '<div class="courses-grid">';
+        courses.forEach(course => {
+            const isPurchased = window.purchasedCourses.some(p => p.CourseID === course.CourseID);
+            html += `
+                <div class="course-card">
+                    <img src="${course.Thumbnail}" alt="${course.CourseTitle}">
+                    <div class="info">
+                        <div class="title">${course.CourseTitle}</div>
+                        <div class="price">${course.Price == 0 ? 'Free' : 'Rs. ' + course.Price}</div>
+                        ${course.Price == 0 || isPurchased ? `<button onclick="showLessons('${course.CourseID}')">Watch</button>` : `<button onclick="buyCourse('${course.CourseID}')">Buy</button>`}
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // Show lessons for a course
+    async function showLessons(courseId) {
+        currentPage = 'lessons';
+        try {
+            const data = await callApi({ action: 'getLessons', courseId });
+            if (!data.success) throw new Error(data.message || 'Failed to load lessons');
+            const lessons = data.lessons;
+            if (!lessons.length) {
+                alert("No lessons available for this course.");
+                showDashboard();
+                return;
+            }
+            let html = `<div><button onclick="showDashboard()" style="margin-bottom: 20px; padding: 8px 16px;">← Back to Courses</button>`;
+            html += `<h2>Lessons</h2><div class="lessons-grid">`;
+            lessons.forEach((lesson) => {
+                const safeEmbed = lesson.EmbedLink ? lesson.EmbedLink.replace(/"/g, '&quot;') : '';
+                html += `
+                    <div class="lesson-card">
+                        <img src="${lesson.Thumbnail || 'https://via.placeholder.com/300x150?text=No+Thumbnail'}" alt="${lesson.LessonTitle}">
+                        <div class="info">
+                            <div class="title">Lesson ${lesson.LessonNo}: ${lesson.LessonTitle}</div>
+                            <button data-embed="${safeEmbed}" onclick="playLesson(this)">Play</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+            document.getElementById('appContainer').innerHTML = html;
+        } catch (err) {
+            console.error('Error in showLessons:', err);
+            document.getElementById('appContainer').innerHTML = `
+                <div class="error-message">
+                    Failed to load lessons: ${err.message}<br>
+                    <button onclick="showDashboard()">Go Back</button>
+                </div>
+            `;
+        }
+    }
+
+    // Play lesson with fullscreen support
+    function playLesson(button) {
+        const embedLink = button.getAttribute('data-embed');
+        const modal = document.getElementById('videoModal');
+        const container = document.getElementById('videoContainer');
+        container.innerHTML = '';
+
+        if (!embedLink) {
+            container.innerHTML = '<p style="color:white;">No video link available.</p>';
+            modal.style.display = 'flex';
+            return;
+        }
+
+        // Ensure the iframe is set for fullscreen
+        let finalEmbed = embedLink;
+        if (embedLink.includes('<iframe')) {
+            // Add allowfullscreen attribute if missing
+            if (!embedLink.includes('allowfullscreen') && !embedLink.includes('allow="fullscreen"')) {
+                finalEmbed = embedLink.replace('<iframe', '<iframe allow="fullscreen" allowfullscreen');
+            }
+        } else if (embedLink.startsWith('http')) {
+            finalEmbed = `<iframe src="${embedLink}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen style="width:100%; height:100%;"></iframe>`;
+        }
+
+        container.innerHTML = finalEmbed;
+        modal.style.display = 'flex';
+    }
+
+    function closeVideoModal() {
+        const modal = document.getElementById('videoModal');
+        const container = document.getElementById('videoContainer');
+        container.innerHTML = '';
+        modal.style.display = 'none';
+    }
+
+    function buyCourse(courseId) {
+        sessionStorage.setItem('buyCourseId', courseId);
+        showPayment();
+    }
+
+    async function showPayment() {
+        currentPage = 'payment';
+        try {
+            const [banksData, coursesData] = await Promise.all([
+                callApi({ action: 'getBanks' }),
+                callApi({ action: 'getCourses' })
+            ]);
+            const banks = banksData.banks;
+            const allCourses = coursesData.courses;
+            const paidCourses = allCourses.filter(c => c.Price > 0);
+            const selectedCourseId = sessionStorage.getItem('buyCourseId') || '';
+
+            document.getElementById('appContainer').innerHTML = `
+                <div class="payment-form">
+                    <h2>Make Payment</h2>
+                    <select id="bankSelect" onchange="loadAccounts()">
+                        <option value="">Select Bank</option>
+                        ${banks.map(b => `<option value="${b}">${b}</option>`).join('')}
+                    </select>
+                    <select id="accountSelect" onchange="loadTitle()">
+                        <option value="">Select Account Number</option>
+                    </select>
+                    <select id="titleSelect">
+                        <option value="">Account Title</option>
+                    </select>
+                    <select id="courseSelect">
+                        <option value="">Select Course</option>
+                        ${paidCourses.map(c => `<option value="${c.CourseID}" ${c.CourseID === selectedCourseId ? 'selected' : ''}>${c.CourseTitle} (Rs. ${c.Price})</option>`).join('')}
+                    </select>
+                    <input type="text" id="tid" placeholder="Transaction ID" required>
+                    <input type="number" id="amount" placeholder="Amount Paid" required>
+                    <button onclick="submitPayment()">Submit</button>
+                    <button onclick="showDashboard()">Cancel</button>
+                </div>
+            `;
+        } catch (err) {
+            alert('Failed to load payment page: ' + err.message);
+            showDashboard();
+        }
+    }
+
+    async function loadAccounts() {
+        const bank = document.getElementById('bankSelect').value;
+        if (!bank) return;
+        try {
+            const data = await callApi({ action: 'getBankAccounts', bankName: bank });
+            const accounts = data.accounts;
+            const accountSelect = document.getElementById('accountSelect');
+            accountSelect.innerHTML = '<option value="">Select Account Number</option>';
+            accounts.forEach(acc => {
+                accountSelect.innerHTML += `<option value="${acc.accNo}" data-title="${acc.accTitle}">${acc.accNo}</option>`;
+            });
+            document.getElementById('titleSelect').innerHTML = '<option value="">Account Title</option>';
+        } catch (err) {
+            alert('Failed to load accounts: ' + err.message);
+        }
+    }
+
+    function loadTitle() {
+        const selectedOption = document.getElementById('accountSelect').selectedOptions[0];
+        const title = selectedOption ? selectedOption.getAttribute('data-title') : '';
+        const titleSelect = document.getElementById('titleSelect');
+        titleSelect.innerHTML = `<option value="${title}">${title}</option>`;
+    }
+
+    async function submitPayment() {
+        const bank = document.getElementById('bankSelect').value;
+        const accNo = document.getElementById('accountSelect').value;
+        const accTitle = document.getElementById('titleSelect').value;
+        const courseId = document.getElementById('courseSelect').value;
+        const tid = document.getElementById('tid').value;
+        const amount = document.getElementById('amount').value;
+        if (!bank || !accNo || !accTitle || !courseId || !tid || !amount) {
+            alert("Please fill all fields.");
+            return;
+        }
+        try {
+            const data = await callApi({
+                action: 'submitPayment',
+                email: currentUser.email,
+                courseId,
+                bankName: bank,
+                accNo,
+                accTitle,
+                tid,
+                amount
+            });
+            alert(data.message);
+            if (data.success) showDashboard();
+        } catch (err) {
+            alert('Payment submission failed: ' + err.message);
+        }
+    }
+
+    async function showInbox() {
+        currentPage = 'inbox';
+        try {
+            const data = await callApi({ action: 'getMessages', email: currentUser.email });
+            const messages = data.messages;
+            let html = `<div style="padding: 20px;"><h2>Inbox</h2><div id="messageList">`;
+            messages.forEach(m => {
+                const cls = m.SenderEmail === currentUser.email ? 'message-sent' : 'message-received';
+                html += `<div class="message-thread ${cls}"><strong>${m.SenderEmail === currentUser.email ? 'You' : m.SenderEmail}</strong><br>${m.Message}<br><small>${new Date(m.Timestamp).toLocaleString()}</small></div>`;
+            });
+            html += `</div><textarea id="newMsg" placeholder="Type your message..." rows="3" style="width:100%"></textarea><button onclick="sendMessage()">Send</button></div>`;
+            document.getElementById('appContainer').innerHTML = html;
+        } catch (err) {
+            alert('Failed to load inbox: ' + err.message);
+            showDashboard();
+        }
+    }
+
+    async function sendMessage() {
+        const message = document.getElementById('newMsg').value;
+        if (!message) return;
+        try {
+            const data = await callApi({
+                action: 'sendMessage',
+                sender: currentUser.email,
+                receiver: 'admin@coursepedia.com',
+                message
+            });
+            if (data.success) showInbox();
+        } catch (err) {
+            alert('Failed to send message: ' + err.message);
+        }
+    }
+
+    function contactSupport() {
+        window.open('https://wa.me/923127030379?text=' + encodeURIComponent(`Support request from ${currentUser.email}`), '_blank');
+    }
+
+    function showAbout() {
+        currentPage = 'about';
+        document.getElementById('appContainer').innerHTML = `
+            <div style="padding: 20px; text-align: center;">
+                <h2>About Us</h2>
+                <p>This is a project of BhattiPedia a YouTube Channel. We want you to avail the best courses at the cheapest price. This price is nothing for the level of courses. We hope you will Learn and Earn and Keep supporting us.</p>
+                <p>Thank you for being here.</p>
+                <p>Regards,<br>BhattiPedia.</p>
+            </div>
+        `;
+    }
+
+    function logout() {
+        sessionStorage.removeItem('user');
+        document.getElementById('menuIcon').style.display = 'none';
+        showLogin();
+    }
+</script>
+</body>
+</html>
